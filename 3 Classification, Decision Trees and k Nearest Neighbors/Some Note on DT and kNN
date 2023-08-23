@@ -1,0 +1,175 @@
+# I. Overall about Machine Learning
+
+    + A computer program is said to learn from experience E with respect to some class of tasks T and performance measure P, if its performance at tasks in T, as measured by P, improves with experience E.
+
+## 1. Tasks (T) in machine learning:
+    + Classification - classify an instance to one of the categories based on its features
+    + Regression - predict a numerical target feature based on other features of an instance
+    + Clustering - identify partitions of instances based on features with the aim of forming groups in which members are similar to each other than in other groups
+    + Anomaly Detection - search for instances which are "greatly dissimilar" to the rest of the instances.
+    + so on...
+    
+## 2. Experience (E) in machine learning:
+    + Data: The foundation of learning, encompassing information that algorithms analyze to acquire insights and make predictions.
+    + Supervised Learning: ML algorithms trained with labeled data. They learn patterns by mapping features to known target variables.
+        + In supervised tasks: Features and target variables are present. 
+    + Unsupervised Learning: ML algorithms analyze data without predefined target variables. They detect hidden patterns and structures within feature sets.
+        + In unsupervised tasks: Only feature sets exist.
+        
+## 3. Example:
+    + As a credit institution, we may want to predict loan defaults based on the data accumulated about our clients.
+        + Experience (E): Our experience is the historical dataset containing client information - the available training data: 
+            + Instances (clients): a collection of features (age, salary, type of loan, past loan defaults, etc.)
+            + Target variable: (whether they defaulted on the loan) - a fact of loan default (1 or 0)
+        + Task (T): 
+            + Classification: binary classification task where the goal is to predict whether a client will default on a loan (1) or not (0)
+            + Regression:  numerical prediction of how overdue a loan payment is, which involves predicting a continuous variable.
+        + Performance (P):
+            + Metrics to evaluate the model
+            + Classification: Precision, Recall, F1, Accuracy, AUC/ROC, Confusion Matrix
+            + Regression: MAE, MSE, R-squared, RMSE, Adjusted R-squared
+        
+        
+# II. Decision Tree
+
+## 1. Basics
+    + Decison tree logical rules are easy to interprete
+    + Other "more accurate" models - 'black box' approach where it's harder to interprete how the unput data was transformed into output.
+    + Due to this “understandability” and similarity to human decision-making (you can easily explain your model to your boss), decision trees have gained immense popularity. 
+    
+## 2. How to Build a Decision Tree
+    + Choose the first variable as root node:
+        + Using the concept of Information Gain (C4.5 and C5.0)
+        + Using Entropy (ID3 - Iterative Dichotomiser 3)
+        + Using Gini Impurity (CART - Classification and Regression Trees)
+    + The key in constructing a decision tree is to find the best split at each iteration that results in the lowest value of Gini Impurity or Entropy. 
+    + The decision tree algorithm aims to create branches that are as pure as possible, meaning that they contain instances of predominantly one class for classification tasks or minimize the variability for regression tasks.
+
+## 3. Tree-building Algorithm
+    + How many questions to create a perfect fit for decision tree to the training set.
+    + At the heart of the popular algorithms for decision tree construction, such as ID3 or C4.5, lies the principle of greedy maximization of information gain: at each step, the algorithm chooses the variable that gives the greatest information gain upon splitting. Then the procedure is repeated recursively until the entropy is zero (or some small value to account for overfitting). 
+    + We will see that the entropy plot is very close to the plot of Gini Impurity, doubled. Therefore, in practice, these two criteria are almost identical
+    
+    + [Conclusion: Split the data at each node in a way that maximizes the information gain, and iterate so that entropy/gini to minimum]
+    
+## 4. How a Decision Tree Works with Numerical Features
+    + Heuristics are usually used to limit the number of thresholds to which we compare the quantitative variable.
+    + The tree looks for the values at which the target class switches its value as a threshold for “cutting” a quantitative variable.
+    
+    + [Conclusion: the simplest heuristics for handling numeric features in a decision tree is to sort its values in ascending order and check only those thresholds where the value of the target variable changes]
+    
+    
+## 5. Crucial Tree Parameters
+    + Decision Tree if is built too deep or tuned too many will lead to overfitting, which means it will have little power to predict if new data is presented.
+    + At the bottom of the tree, at some greath depth, there will be partitions on less important features.
+    + There are two exceptions where the trees are built to the maximum depth:
+        + Random Forest (a group of decision trees) averages the responses from individual trees that are built to the maximum depth
+        + Pruning trees. In this approach, the tree is first constructed to the maximum depth. Then, from the bottom up, some nodes of the tree are removed by comparing the quality of the tree with and without that partition (comparison is performed using cross-validation)
+    + How to deal with overffitting:
+        + Artificial limitation of the depth of the tree or a minimum number of samples in the leaves: the construction of a tree just stops at some point
+        + Pruning the tree
+
+## 6. Class DecisionTreeClassifier in Scikit-learn
+    +  sklearn.tree.DecisionTreeClassifier
+    + Parameters:
+        + max_depth: the maximum depth of the tree
+        + max_feature: the maximum number of features with which to search for the best partition
+        + min_sample_leaf: minimum number of samples in a leaf
+    + The parameters of the tree need to be set depending on input data, and it is usually done by means of cross-validation
+    
+## 7. Decision Tree in a Regression Problem
+    + Criteria change to minimizing the variance
+    
+    
+# III. Nearest Neighbors Method
+
+## 1. Basics
+    + The nearest neighbors method (k-Nearest Neighbors, or k-NN) is another very popular classification method that is also sometimes used in regression problems. 
+    + This, like decision trees, is one of the most comprehensible approaches to classification. 
+    + The underlying intuition is that "you look like your neighbors."
+    + Hypothesis: if the distance between the examples is measured well enough, then similar examples are much more likely to belong to the same class.
+    + To classify a new sample from test set, perform:
+        + Step 1: Calculate distance to each of the samples in the training set
+        + Step 2: Select k samples from the training set with the minimal distance to them
+        + Step 3: The class of the test sample will be the most frequen class among those k nearest neighbors.
+    + With regression problem: on Step 3, it returns not the class but the number - the mean of the targetr variable among neightbors.
+    + This approach is lazy:
+        + Calculations are only done during the prediction phase, when a sample needs to be classified
+        + No model is constructed from the training sets beforehand
+        + Unlike Decision Tree, the training set constructs the tree model before putting a testing sample to predict.
+        
+## 2. Nearest Neighbors Method in Real Applications
+    + k-NN is used for the construction of meta-features (i.e. k-NN predictions as input to other models) ~ fill in null values
+    + k-NN extends to tasks like recommendation system
+    + The quality of classification/regression with k-NN depends on several parameters:
+        + Number of k neighbors
+        + Distance measure between samples (Hamming, Euclidean, Cosine, Minkowski, Manhattan distance,...)
+        + Metrics require data to be scaled to the similar scale.
+        + Weights of neighbors are different (the further the sample, the lower the weight)
+        
+## 3. Class KNeighborsClassifier in Scikit-learn
+    + Parameters:
+        + weights: {‘uniform’ - all weights are equal, ‘distance’ - weight is inversely proprotional to the distance from the test sample}
+        + algorithm {'brute', 'ball_tree', 'KD_tree', 'auto'} 
+            + brute: the nearest neighbors for each test case are computed by a grid search over the training set
+            + ball_tree + KD_tree: the distances between the examples are stored in a tree to accelerate finding nearest neigbors
+            + auto: the right way to find the neighbors will be automatically chosen based on the training set
+        + leaf_size: threshold for switching to grid search if the algorithm for finding neighbors is Ball/KD_Tree
+        + metric: {'minkowski', 'manhattan', 'euclidean', 'chebyshev'}
+
+## 4. Choosing Model Parameters and Cross-Validation
+    + The main task of learning algorithms is to be able to generalize to unseen data so we need to sacrifice a small portion of data to check quality of the model on it. Done in two ways:
+        + setting aside a part of the dataset (held-out/hold-out set)
+            + Training set: 60-80% of the original dataset -> Used to train model
+            + Holdout set: 20-40% of the original dataset -> Used to compute performance metrics (accuracy)for the model to evaluate models
+        + cross-validation - often is k-fold cross-validation
+            + Model is trained k times on different (k-1) subsets of the original dataset
+            + Model is evaluated k times on the other left subsets (each time different one)
+            + Obtain K model quality assessments - average quality
+        + Cross-validation performs better to new data compared to holdout set approach, yet, computationally expensive.
+        
+=> The conclusion of this experiment (and general advice): first check simple models on your data: decision tree and nearest neighbors (next time we will also add logistic regression to this list). It might be the case that these methods already work well enough.
+        
+# IV. Pros and Cons of Decision Trees and the Nearest Neighbors Method
+
+1. Decision Trees
+    Pros:
+        + Clear human-understandable classification rules -> Interpretability of the model is high
+        + Easily visualized
+        + Fast training and forecasting
+        + Small number of parameters
+        + Support both numerical and categorical features
+        + Does not need to scale data
+    Cons: 
+        + Sensitive to noise in input data, the whole model could change if the training set is slightly modified
+        + Separating border built by a decision tree has its limitations – it consists of hyperplane sperpendicular to one of the coordinate axes
+        + Need to avoid overfitting by pruning the tree, by setting a minimum number of samples in each leaf, or defining a maximum depth for the tree.
+        + Instability - small change can change the whole tree
+        + The model can only interpolate but not extrapolate (the same is true for random forests and tree boosting)
+        
+2. The k Nearest Neighbors
+    Pros:
+        + Simple implementation
+        + Well studied
+        + Good for classification, regression and recommendations
+        + Can be adapted to certain problem by choosing the right metrics or kernel
+        + Good interpretability
+    Cons:
+        + With large dataset, number of neighbors is large (100-150), so the algorithm is not as fast as decision tree
+        + If dataset has many variables, it's difficult to find the right weights and to determine which features are not important
+        + Dependency on the selected distance metric between the objects (Euclidean, Manhattan, ....)
+        + No theoretical ways to choose the number of neighbors\
+        + Does not work well when there are a lot of features due to the “curse of dimensionality”
+        + Need scaling to the same scale.
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
