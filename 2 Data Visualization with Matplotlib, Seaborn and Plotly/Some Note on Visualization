@@ -1,0 +1,92 @@
+Cũng khá similar to cách mình tư duy về đồ thị, với 
+make chart more beautiful 
+
+%config InlineBackend.figure_format = 'svg'
+
+I. Univariate
+
+1. Quantitative Features:
+    + Histogram: groups values into bins of equal value range and contains clues about the underlying distribution type
+        + sns.histplot()
+    + Kernel density plot: smoothed version of the histogram
+        + sns.kdeplot()
+    + Box plot: illustrates certain statistics concerning individual examples in a dataset
+        + sns.boxplot()
+    + Violin plot: concentrates more on the smoothed distribution as a whole
+        + sns.violinplot()
+    + Swarm Plot: displays individual data points along an axis, providing a visual representation of the data's distribution.
+        + sns.swarmplot()
+    + .describe()
+    
+2. Categorical and Binary Features:
+    + If the values of a categorical variable are ordered, it is called ordinal
+    
+    + Frequency table using value counts
+        + df[variable].value_counts()
+    + Bar plot: is a graphical representation of the frequency table:
+        + sns.countplot()
+        + sns.barplot() is used to compare metrics across the categories (tend to mean), not for normal counting bar
+    + Pie Chart/ Donut Chart (meh)
+
+Note: Differentiate between Histogram and Bar Plot
+    + Histograms are best suited for looking at the distribution of numerical variables while bar plots are used for categorical features
+    + The values on the X-axis in the histogram are numerical; a bar plot can have any type of values on the X-axis: numbers, strings, booleans.
+    
+3. Multivariate Visualization
+3.1 Quantitative vs. Quantitative
+    + Correlation matrix using .heatmap(): shows correlations among the numerical variables in our dataset
+        + Get rid of dependent variables calculated from other variables since they do not contribute any additional information
+        + Which variables have more correlation with the target variables
+        + sns.heatmap(data=df.corr(numeric_only=True))
+    + Scatter plot: displays values of two numerical variables as Cartesian coordinates in 2D space.
+        + Positive/Negative correlated
+        + Not correlated at all
+        + sns.scatterplot()
+    + Joint plot: similar to scatter plot but also see the histogram/kde of each one
+        sns.jointplot(kind='kde') # default is histogram
+    + Scatterplot matrix: 
+        + diagonal contains the distributions of the corresponding variablesthe 
+        + scatter plots for each pair of variables fill the rest of the matrix
+        + sns.pairplot()
+3.2 Quantitative vs. Categorical
+    + sns.lmplot(): is primarily used to create scatter plots with optional linear regression fits, also incorporate the 'hue' parameter
+    + sns.boxplot(): creates box plots, which provide a summary of the distribution of a quantitative variable across different categories of a categorical variable.
+    + sns.catplot(): analyzes a quantitative variable in two categorical variables/dimensions at once  
+3.3 Categorical vs. Categorical
+    + sns.countplot() + hue = target variable
+    + Contingency table, also called a cross tabulation
+        + pd.crosstab(df[variable1], df[variable2])
+        df.groupby()[variable_to_show].
+
+4. Whole dataset visualizations
+4.1 A naive approach
+4.2 Dimensionality reduction
+    + Principal Component Analysis (PCA) using linear algorithm
+    + t-SNE using non-linear methods, collectively called Manifold Learning
+4.3 t-SNE
+    + t-distributed Stochastic Neighbor Embedding
+    + Its basic idea is simple: find a projection for a high-dimensional feature space onto a plane (or a 3D hyperplane, but it is almost always 2D) such that those points that were far apart in the initial n-dimensional space will end up far apart on the plane. 
+    
+    from sklearn.manifold import TSNE
+    from sklearn.preprocessing import StandardScaler
+    X = df.drop(["Churn", "State"], axis=1)
+    X["International plan"] = X["International plan"].map({"Yes": 1, "No": 0})
+    X["Voice mail plan"] = X["Voice mail plan"].map({"Yes": 1, "No": 0})
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+    
+    %%time
+    tsne = TSNE(random_state=17)
+    tsne_repr = tsne.fit_transform(X_scaled)
+    plt.scatter(tsne_repr[:, 0], tsne_repr[:, 1], alpha=0.5);
+    
+    plt.scatter(
+        tsne_repr[:, 0],
+        tsne_repr[:, 1],
+        c=df["Churn"].map({False: "blue", True: "orange"}),
+        alpha=0.5,
+    );
+
+    
+    
+    
